@@ -1,28 +1,35 @@
-from pytube import YouTube
+# a Python script to download any Youtube video
 
+from pytube import YouTube
+import pytube.request
+
+# Change the value here to something smaller to decrease chunk sizes,
+#  thus increasing the number of times that the progress callback occurs
+pytube.request.default_range_size = 537184  # 9MB chunk size
 
 
 def get_video_object(url):
-    url = url
+    # used for progress bar
     def on_complete(stream, filepath):
         print("Download complete!")
         print(filepath)
-
+    # used for progress bar
     def on_progress(stream, chunk, bytes_remaining):
-        progress_string = f'100 - {round(bytes_remaining / stream.filesize * 100,2)}%'
-        print(progress_string)
+        progress_string = f'{round(100 - (bytes_remaining / stream.filesize * 100),2)}%'
+        print(f'\r{progress_string}\r')
     
+    #saving video object into a variable
     video_object = YouTube(url, on_complete_callback = on_complete, on_progress_callback = on_progress)
 
     return(video_object)
 
 def get_all_video_streams(video_object):
-    print("\n<--------------  Display audio+video streams  -------------->")
+    print("\n<------------------  Display audio+video streams  ------------------->")
     ###>>> get all the streams with video+audio 
     for stream in video_object.streams.filter(progressive=True):
         print(stream)
     
-    print("\n<--------------  Display audio-only streams  -------------->")
+    print("\n<-------------------  Display audio-only streams  ------------------->")
     print("""\nThese streams are audio only ie only_audio=True.\n""")
 
     ###>>> get all the streams with video+audio
@@ -37,7 +44,7 @@ def get_video_info(video_object):
     print(f'length: {round(video_object.length / 60,2)} minutes')
     print(f'views:  {round(video_object.views / 1000000,3)} million')
     print(f'author: {video_object.author}')
-    print('\n<---------------------------------------------------------------------->\n')
+    print('\n<---------------------------------------------------------------------->')
 
 
 def dl_video(video_object):
@@ -49,7 +56,7 @@ def dl_video(video_object):
 
     print("\n<---------------  Download started  ---------------------->\nDownloading...")
 
-    stream.download()
+    selected_stream.download()
     print("\n<----------------  Download finished  -------------------->\n")
 
 if __name__ == "__main__":

@@ -1,14 +1,17 @@
+###  Another variation of the same pytube package
+
 from pytube import YouTube
 import pytube.request
 from colorama import init, Fore, Back, Style
 
+# This is neede if the downloadable file size is very small, then only a few updates on the progress bar.
 # Change the value here to something smaller to decrease chunk sizes,
 #  thus increasing the number of times that the progress callback occurs
 pytube.request.default_range_size = 437184  # 9MB chunk size
 
+
+# this is for colorama -> to make CLI based UI more colorful
 init()
-#link = str(input("Enter Youtube URL: "))
-link = "https://www.youtube.com/watch?v=CML6vfKjQss"
 
 def on_complete(stream, filepath):
     print("Download complete!")        
@@ -19,8 +22,6 @@ def on_progress(stream, chunk, bytes_remaining):
     print("Downloading...")
     print(progress_string)
 
-video_object = YouTube(link, on_complete_callback = on_complete, on_progress_callback = on_progress)
-
 def get_video_info(video_object):
     print('\n<------------------------  Video info  --------------------------------->\n')
     print(Fore.GREEN + Back.CYAN + Style.BRIGHT + f' Title:  {Style.RESET_ALL}{Style.BRIGHT} {video_object.title}')
@@ -30,16 +31,20 @@ def get_video_info(video_object):
     print(Fore.GREEN + f'    URL:  {Style.RESET_ALL}{Style.BRIGHT}{link}')
     print('\n<---------------------------------------------------------------------->\n')
 
+# getting the pytube YouTube function to get the 
+video_object = YouTube(link, on_complete_callback = on_complete, on_progress_callback = on_progress)
+
 get_video_info(video_object)
 
+# presenting DL options to user
 print(
     Fore.BLUE + Style.BRIGHT + 'Download: ' + 
     Fore.GREEN + Style.BRIGHT + f'(b)est {Style.RESET_ALL}|' + 
     Fore.YELLOW + Style.BRIGHT + f'(w)orst {Style.RESET_ALL}|' +
     Fore.CYAN + Style.BRIGHT + f'(a)udio {Style.RESET_ALL}{Style.BRIGHT}| (e)xit'
     )
+## accepting user input for stream selection
 download_choice = input('Choice: ')
-
 if download_choice == "b": 
     video_object.streams.get_highest_resolution().download()
 if download_choice == 'w':
