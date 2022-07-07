@@ -12,19 +12,15 @@ import pytube.request # for changing the default interval at which a progress ba
 #  thus increasing the number of times that the progress callback occurs
 pytube.request.default_range_size = 437184  # 9MB chunk size
 
-# defining functions that allow for progress bar while downloading. Are called when YouTube video_object is called in main function
-def progress_check(stream, chunk, bytes_remaining):
-        window['-DOWNLOADPROGRESS-'].update(100 - round(bytes_remaining / stream.filesize * 100))
+# selects the theme of GUI app
+sg.theme('DarkRed')
 
-def on_complete(stream, file_path):
-    window['-DOWNLOADPROGRESS-'].update(0)
-
-# define the apps start layout variable that will be used to initialize the first window instance
+# defines the apps start layout that will be used to initialize the first window instance
 start_layout = [
         [sg.Input(key = '-INPUT-'),sg.Button('submit')],
     ]
 
-# define the content of main_layout first tab as info_tab variable
+# defining the content of main_layout first tab as info_tab 
 info_tab = [
     [sg.Text('Title:'), sg.Text('', key='-TITLE-')],
     [sg.Text('Length:'), sg.Text('', key='-LENGTH-')],
@@ -37,7 +33,7 @@ info_tab = [
     ]
 ]
 
-# define the content of main_layout second tab as download_tab variable
+# defines the content of main_layout second tab as download_tab 
 download_tab = [
     [sg.Frame('Best Quality', [[
         sg.Button('Download', key='-BEST-'),
@@ -55,7 +51,7 @@ download_tab = [
                 key='-DOWNLOADPROGRESS-', expand_x=True)]
 ]
 
-# defining the main_layout that puts together the previously defined first and second tab
+# defines the main_layout that puts together the previously defined first and second tab
 main_layout = [
     [sg.TabGroup([
         [sg.Tab('info', info_tab), sg.Tab('Download', download_tab)]
@@ -63,16 +59,22 @@ main_layout = [
     ]
 ]
 
-def main():
+# All gui app logic
+def gui_app():
 
-    # changes the theme of GUI app
-    sg.theme('Darkred2')
+    # defining functions that allow for progress bar while downloading. Are called when YouTube video_object is called in main function
+    def progress_check(stream, chunk, bytes_remaining):
+            window['-DOWNLOADPROGRESS-'].update(100 - round(bytes_remaining / stream.filesize * 100))
+
+    def on_complete(stream, file_path):
+        window['-DOWNLOADPROGRESS-'].update(0)
 
     # creates app instance with name and first layout defined as 'start_layout'
     window = sg.Window('YT Converter', start_layout)
 
     # the actual app loop
     while True:
+        
         # reads the values from user input event
         event, values = window.read()
 
@@ -123,6 +125,11 @@ def main():
 
     # closes the window if While loop exits
     window.close()
+
+def main():   
+
+    # calls the GUI app function
+    gui_app()
 
     # end of main function
 
