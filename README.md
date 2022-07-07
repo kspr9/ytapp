@@ -10,4 +10,6 @@ testingytdl.py test if ytdl works as package when imported
 
 and lastly GUI.py uses PySimpleGUI package to create a GUI app. Install requirements and run python3 GUI.py
 
+or you can import gui_app from GUI if that is what you want for some reason :)
+
 Happy playing!
