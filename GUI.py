@@ -3,103 +3,109 @@
 
 import PySimpleGUI as sg
 from pytube import YouTube
-import pytube.request # for changing the default interval at which a progress bar is updated
 
+
+import pytube.request # for changing the default interval at which a progress bar is updated
 # Progress bar update resolution. One progress bar per each chunk.
 # smaller chunk size == chunk progression updated more frequently
 # Change the value here to something smaller to decrease chunk sizes,
 #  thus increasing the number of times that the progress callback occurs
 pytube.request.default_range_size = 437184  # 9MB chunk size
 
-def progress_check(stream, chunk, bytes_remaining):
-	window['-DOWNLOADPROGRESS-'].update(100 - round(bytes_remaining / stream.filesize * 100))
+def main():
 
-def on_complete(stream, file_path):
-	window['-DOWNLOADPROGRESS-'].update(0)
+    def progress_check(stream, chunk, bytes_remaining):
+        window['-DOWNLOADPROGRESS-'].update(100 - round(bytes_remaining / stream.filesize * 100))
 
-sg.theme('Darkred2')
+    def on_complete(stream, file_path):
+        window['-DOWNLOADPROGRESS-'].update(0)
 
-start_layout = [
-	[sg.Input(key = '-INPUT-'),sg.Button('submit')],
-]
+    sg.theme('Darkred2')
 
-info_tab = [
-    [sg.Text('Title:'), sg.Text('', key='-TITLE-')],
-    [sg.Text('Length:'), sg.Text('', key='-LENGTH-')],
-    [sg.Text('Views:'), sg.Text('', key='-VIEWS-')],
-    [sg.Text('Author:'), sg.Text('', key='-AUTHOR-')],
-    [
-        sg.Text('Description:'),
-        sg.Multiline('', key='-DESCRIPTION-', size=(40, 20),
-                     no_scrollbar=True, disabled=True)
+    start_layout = [
+        [sg.Input(key = '-INPUT-'),sg.Button('submit')],
     ]
-]
 
-download_tab = [
-    [sg.Frame('Best Quality', [[
-        sg.Button('Download', key='-BEST-'),
-        sg.Text('', key='-BESTRES-'),
-        sg.Text('', key='-BESTSIZE-')]])],
-    [sg.Frame('Worst Quality', [[
-        sg.Button('Download', key='-WORST-'),
-        sg.Text('', key='-WORSTRES-'),
-        sg.Text('', key='-WORSTSIZE-')]])],
-    [sg.Frame('Audio', [[
-        sg.Button('Download', key='-AUDIO-'),
-        sg.Text('', key='-AUDIOSIZE-')]])],
-    [sg.VPush()],
-    [sg.Progress(100, orientation='h', size=(20, 20),
-                 key='-DOWNLOADPROGRESS-', expand_x=True)]
-]
-
-main_layout = [
-    [sg.TabGroup([
-        [sg.Tab('info', info_tab), sg.Tab('Download', download_tab)]
-    ])
+    info_tab = [
+        [sg.Text('Title:'), sg.Text('', key='-TITLE-')],
+        [sg.Text('Length:'), sg.Text('', key='-LENGTH-')],
+        [sg.Text('Views:'), sg.Text('', key='-VIEWS-')],
+        [sg.Text('Author:'), sg.Text('', key='-AUTHOR-')],
+        [
+            sg.Text('Description:'),
+            sg.Multiline('', key='-DESCRIPTION-', size=(40, 20),
+                        no_scrollbar=True, disabled=True)
+        ]
     ]
-]
 
-window = sg.Window('YT Converter', start_layout)
+    download_tab = [
+        [sg.Frame('Best Quality', [[
+            sg.Button('Download', key='-BEST-'),
+            sg.Text('', key='-BESTRES-'),
+            sg.Text('', key='-BESTSIZE-')]])],
+        [sg.Frame('Worst Quality', [[
+            sg.Button('Download', key='-WORST-'),
+            sg.Text('', key='-WORSTRES-'),
+            sg.Text('', key='-WORSTSIZE-')]])],
+        [sg.Frame('Audio', [[
+            sg.Button('Download', key='-AUDIO-'),
+            sg.Text('', key='-AUDIOSIZE-')]])],
+        [sg.VPush()],
+        [sg.Progress(100, orientation='h', size=(20, 20),
+                    key='-DOWNLOADPROGRESS-', expand_x=True)]
+    ]
 
-while True:
-    event, values = window.read()
+    main_layout = [
+        [sg.TabGroup([
+            [sg.Tab('info', info_tab), sg.Tab('Download', download_tab)]
+        ])
+        ]
+    ]
 
-    if event == sg.WIN_CLOSED or event == 'Cancel':
-        break
+    window = sg.Window('YT Converter', start_layout)
 
-    if event == 'submit':
-        video_object = YouTube(values['-INPUT-'], on_progress_callback=progress_check, on_complete_callback=on_complete)
-        window.close()
+    while True:
+        event, values = window.read()
 
-        # main window info setup
-        window = sg.Window('Converter', main_layout, finalize=True)
-        window['-TITLE-'].update(video_object.title)
-        window['-LENGTH-'].update(f'{round(video_object.length / 60,2)} minutes')
-        window['-VIEWS-'].update(video_object.views)
-        window['-AUTHOR-'].update(video_object.author)
-        window['-DESCRIPTION-'].update(video_object.description)
+        if event == sg.WIN_CLOSED or event == 'Cancel':
+            break
 
-        # main window download setup
-        window['-BESTSIZE-'].update(
-            f'{round(video_object.streams.get_highest_resolution().filesize / 1048576,1)} MB')
-        window['-BESTRES-'].update(
-            video_object.streams.get_highest_resolution().resolution)
+        if event == 'submit':
+            video_object = YouTube(values['-INPUT-'], on_progress_callback=progress_check, on_complete_callback=on_complete)
+            window.close()
 
-        window['-WORSTSIZE-'].update(
-            f'{round(video_object.streams.get_lowest_resolution().filesize / 1048576,1)} MB')
-        window['-WORSTRES-'].update(
-            video_object.streams.get_lowest_resolution().resolution)
+            # main window info setup
+            window = sg.Window('Converter', main_layout, finalize=True)
+            window['-TITLE-'].update(video_object.title)
+            window['-LENGTH-'].update(f'{round(video_object.length / 60,2)} minutes')
+            window['-VIEWS-'].update(video_object.views)
+            window['-AUTHOR-'].update(video_object.author)
+            window['-DESCRIPTION-'].update(video_object.description)
 
-        window['-AUDIOSIZE-'].update(
-            f'{round(video_object.streams.get_audio_only().filesize / 1048576,1)} MB')
+            # main window download setup
+            window['-BESTSIZE-'].update(
+                f'{round(video_object.streams.get_highest_resolution().filesize / 1048576,1)} MB')
+            window['-BESTRES-'].update(
+                video_object.streams.get_highest_resolution().resolution)
 
-    if event == '-BEST-':
-        video_object.streams.get_highest_resolution().download()
+            window['-WORSTSIZE-'].update(
+                f'{round(video_object.streams.get_lowest_resolution().filesize / 1048576,1)} MB')
+            window['-WORSTRES-'].update(
+                video_object.streams.get_lowest_resolution().resolution)
 
-    if event == '-WORST-':
-        video_object.streams.get_lowest_resolution().download()
+            window['-AUDIOSIZE-'].update(
+                f'{round(video_object.streams.get_audio_only().filesize / 1048576,1)} MB')
 
-    if event == '-AUDIO-':
-        video_object.streams.get_audio_only().download()
+        if event == '-BEST-':
+            video_object.streams.get_highest_resolution().download()
 
-window.close()
+        if event == '-WORST-':
+            video_object.streams.get_lowest_resolution().download()
+
+        if event == '-AUDIO-':
+            video_object.streams.get_audio_only().download()
+
+    window.close()
+
+if __name__ == "__main__":
+    main()
