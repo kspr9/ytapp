@@ -1,6 +1,7 @@
 # a Python script to download any Youtube video
 
 from pytube import YouTube
+from pytube.cli import on_progress
 import pytube.request
 
 # Change the value here to something smaller to decrease chunk sizes,
@@ -14,10 +15,14 @@ def get_video_object(url):
         print("Download complete!")
         print(filepath)
     # used for progress bar
-    def on_progress(stream, chunk, bytes_remaining):
-        progress_string = f'{round(100 - (bytes_remaining / stream.filesize * 100),2)}%'
-        print(f'\r{progress_string}\r')
+    #def on_progress(stream, chunk, bytes_remaining):
+    #    progress_string = f'{round(100 - (bytes_remaining / stream.filesize * 100),2)}%'
+    #    print(f'{progress_string}\r')
     
+    ##  https://stackoverflow.com/questions/44565704/how-to-clear-only-last-one-line-in-python-output-console
+    ##  https://stackoverflow.com/questions/63521418/how-to-fix-a-progress-bar-at-the-terminals-last-line-using-python
+
+
     #saving video object into a variable
     video_object = YouTube(url, on_complete_callback = on_complete, on_progress_callback = on_progress)
 
